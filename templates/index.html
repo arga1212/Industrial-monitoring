@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard IoT Sungai</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .container { max-width: 600px; margin: auto; }
+        img { width: 100%; border-radius: 10px; }
+        .status { font-size: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Dashboard IoT Sungai</h2>
+        <h3>Gambar dari ESP32-CAM</h3>
+        <img id="image" src="{{ url_for('static', filename='uploads/latest.jpg') }}" alt="ESP32-CAM Image">
+        <h3>Status Kualitas Air</h3>
+        <p class="status" id="status">Menunggu data...</p>
+        <h3>Data Sensor Gas</h3>
+        <p id="sensor_data">Menunggu data...</p>
+    </div>
+
+    <script>
+        var socket = io.connect("http://" + document.domain + ":" + location.port);
+
+        // Update status air
+        socket.on("update_status", function(data) {
+            document.getElementById("status").innerHTML = "Status: " + data.status + " (Polusi: " + data.warna_tidak_normal.toFixed(2) + "%)";
+            document.getElementById("image").src = "/static/uploads/latest.jpg?" + new Date().getTime();
+        });
+
+        // Update data sensor gas
+        socket.on("sensor_update", function(data) {
+            document.getElementById("sensor_data").innerHTML = "MQ-135: " + data.mq135 + " ppm | MQ-4: " + data.mq4 + " ppm";
+        });
+    </script>
+</body>
+</html>
